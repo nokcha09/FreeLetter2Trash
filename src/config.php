@@ -5,6 +5,9 @@ define('DB_NAME', 'newsletter_db');
 define('DB_USER', 'root');
 define('DB_PASS', 'your_root_password');
 
+define('ADMIN_USERNAMES', ['admin']);
+define('ADMIN_PASSWORD', 'password123!');
+
 // DB 연결
 try {
     $pdo = new PDO(

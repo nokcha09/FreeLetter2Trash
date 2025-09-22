@@ -1,18 +1,21 @@
 <?php
-// 이 페이지는 처음 접속 시 폼을 보여주고,
-// POST 요청이 왔을 때만 구독 해제 로직을 처리합니다.
-
 require_once 'config.php';
 
 $message = '';
 $isSuccess = false;
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = $_POST['email'];
+// GET 또는 POST 요청에서 이메일 주소가 있는 경우에만 로직 실행
+if (isset($_GET['email']) || isset($_POST['email'])) {
+    
+    // GET 요청일 경우 URL 쿼리 파라미터에서 이메일 가져오기
+    if (isset($_GET['email'])) {
+        $email = urldecode($_GET['email']);
+    } elseif (isset($_POST['email'])) {
+        $email = $_POST['email'];
+    }
 
     if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
         try {
-            // subscribers 테이블에서 해당 이메일 삭제
             $stmt = $pdo->prepare("DELETE FROM subscribers WHERE email = :email");
             $stmt->bindParam(':email', $email);
             $stmt->execute();
@@ -37,62 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>구독 해제</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f4f4f9;
-            text-align: center;
-        }
-        .container {
-            padding: 40px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-        .message-box {
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-        .success { background-color: #d4edda; color: #155724; }
-        .error { background-color: #f8d7da; color: #721c24; }
-        input[type="email"] {
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 1em;
-            width: 80%;
-            margin-bottom: 10px;
-        }
-        button {
-            padding: 12px 20px;
-            border: none;
-            background-color: #007bff;
-            color: #fff;
-            border-radius: 5px;
-            font-size: 1em;
-            cursor: pointer;
-        }
-        .home-link {
-            display: inline-block;
-            margin-top: 30px;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">

@@ -8,89 +8,95 @@ require_once 'config.php';
 $message = '';
 $isSuccess = false;
 
-// 메일 제목과 내용 설정
-$subject = "테스트 뉴스레터";
-$body = "<h1>안녕하세요! FreeLetter 테스트 메일입니다.</h1><p>이 메일은 로컬에서 정상적으로 전송되었는지 확인하기 위한 용도입니다.</p>";
+// 웹사이트 기본 URL 설정
+$baseUrl = 'http://localhost:8080';
 
-// PHPMailer 설정
-$mail = new PHPMailer(true);
-try {
-    $mail->isSMTP();
-    $mail->Host = getenv('SMTP_HOST') ?: 'mailhog';
-    $mail->Port = getenv('SMTP_PORT') ?: 1025;
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $subject = $_POST['subject'] ?? '새로운 뉴스레터';
+    $raw_body = $_POST['body'] ?? '내용이 없습니다.';
 
-    // MailHog는 인증과 암호화가 필요 없도록 설정
-    $mail->SMTPAuth = false;
-    $mail->SMTPSecure = false; // 암호화 비활성화
-    $mail->SMTPAutoTLS = false; // 자동 TLS 사용 비활성화
+    $mail = new PHPMailer(true);
+    try {
+        $mail->isSMTP();
+        $mail->Host = getenv('SMTP_HOST') ?: 'mailhog';
+        $mail->Port = getenv('SMTP_PORT') ?: 1025;
+        $mail->SMTPAuth = false;
+        $mail->SMTPSecure = false;
+        $mail->SMTPAutoTLS = false;
 
-    $mail->setFrom('noreply@freeletter.com', 'FreeLetter');
-    $mail->addAddress('test@example.com'); // 테스트용 주소
-    $mail->isHTML(true);
-    $mail->Subject = $subject;
-    $mail->Body = $body;
-    $mail->CharSet = 'UTF-8';
+        $mail->setFrom('noreply@freeletter.com', 'FreeLetter');
+        $mail->isHTML(true);
+        $mail->Subject = $subject;
+        $mail->CharSet = 'UTF-8';
 
-    $mail->send();
-    $message = "테스트 메일이 성공적으로 전송되었습니다.";
-    $isSuccess = true;
+        $stmt = $pdo->query("SELECT email FROM subscribers");
+        $subscribers = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-} catch (Exception $e) {
-    $message = "메일 전송 실패: {$mail->ErrorInfo}";
+        if (empty($subscribers)) {
+            $message = "구독자가 없습니다. 메일을 보낼 수 없습니다.";
+        } else {
+            foreach ($subscribers as $email) {
+                // 구독 해제 링크를 동적으로 생성 (포트 8080 포함)
+                $unsubscribeLink = "{$baseUrl}/unsubscribe.php?email=" . urlencode($email);
+
+                // HTML 메일 템플릿
+                $htmlBody = "
+                <div style='font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;'>
+                    <table style='width: 100%; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);'>
+                        <tr>
+                            <td style='padding: 20px; text-align: center; background-color: #6C8E69; border-top-left-radius: 8px; border-top-right-radius: 8px;'>
+                                <h1 style='color: #ffffff; margin: 0;'>FreeLetter</h1>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 20px; color: #333333;'>
+                                <h2>{$subject}</h2>
+                                <p>{$raw_body}</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 20px; text-align: center; border-top: 1px solid #eeeeee;'>
+                                <p style='font-size: 12px; color: #999999;'>더 이상 뉴스레터를 받고 싶지 않으시면 <a href='{$unsubscribeLink}' style='color: #6C8E69; text-decoration: none;'>여기</a>를 클릭하세요.</p>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                ";
+
+                $mail->clearAddresses();
+                $mail->addAddress($email);
+                $mail->Body = $htmlBody;
+                $mail->send();
+            }
+            $message = "뉴스레터가 모든 구독자에게 성공적으로 전송되었습니다.";
+            $isSuccess = true;
+        }
+
+    } catch (Exception $e) {
+        $message = "메일 전송 실패: {$mail->ErrorInfo}";
+    }
 }
-
 ?>
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>메일 전송 테스트</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f4f4f9;
-            text-align: center;
-        }
-        .container {
-            padding: 40px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-        .message-box {
-            padding: 15px;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-        .success { background-color: #d4edda; color: #155724; }
-        .error { background-color: #f8d7da; color: #721c24; }
-        .home-link {
-            display: inline-block;
-            margin-top: 30px;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-    </style>
+    <title>뉴스레터 보내기</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>메일 전송 테스트</h1>
-        <div class="message-box <?= $isSuccess ? 'success' : 'error' ?>">
-            <?= htmlspecialchars($message) ?>
-        </div>
+        <h1>뉴스레터 보내기</h1>
+        <?php if (!empty($message)): ?>
+            <div class="message-box <?= $isSuccess ? 'success' : 'error' ?>">
+                <?= htmlspecialchars($message) ?>
+            </div>
+        <?php endif; ?>
+        <form action="send.php" method="POST">
+            <input type="text" name="subject" placeholder="제목" required>
+            <textarea name="body" placeholder="본문" required></textarea>
+            <button type="submit">보내기</button>
+        </form>
         <a href="index.php" class="home-link">홈으로 돌아가기</a>
     </div>
 </body>
