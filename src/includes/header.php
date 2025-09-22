@@ -1,22 +1,29 @@
 <?php
+// 세션이 시작되지 않았다면 시작합니다.
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
 $page_title = isset($page_title) ? $page_title : 'FreeLetter: 모두의 뉴스레터';
 ?>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <title><?= htmlspecialchars($page_title) ?></title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreeLetter</title>
     <link rel="stylesheet" href="public/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
-    <div class="header">
-        <h1><a href="/" class="logo">FreeLetter</a></h1>
-        <div>
-            <?php if (isset($_SESSION['authenticated']) && $_SESSION['authenticated'] === true): ?>
-                <a href="logout" class="nav-link">로그아웃</a>
+    <header class="header">
+        <a href="/" class="logo">FreeLetter</a>
+        <nav class="nav">
+            <?php if (isset($_SESSION['user_id'])): ?>
+                <a href="/actions/logout.php" class="nav-link">로그아웃</a>
             <?php else: ?>
-                <a href="login" class="nav-link">뉴스레터 전송하기</a>
+                <a href="/register" class="nav-link">회원가입</a>
+                <a href="/login" class="nav-link">로그인</a>
             <?php endif; ?>
-        </div>
-    </div>
+        </nav>
+    </header>

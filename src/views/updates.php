@@ -1,4 +1,9 @@
 <?php
+
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
 $page_title = 'FreeLetter 업데이트 히스토리';
 // updates.json 파일의 경로 설정
 $updates_file = __DIR__ . '/../data/updates.json';

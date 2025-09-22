@@ -1,4 +1,7 @@
 <?php
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 // 기존에 있던 config.php 파일 포함
 require_once __DIR__ . '/../config/config.php';
 
@@ -33,8 +36,11 @@ if (file_exists($updates_file)) {
         <p>이 프로젝트는 자유와 혼돈이 공존하는 작은 사회 실험입니다. 자신의 메일함을 쓰레기통으로 만들 용기가 있는 사람들만이 이 곳의 뉴스레터를 구독합니다. 어떤 이야기가 도착할지는 아무도 알 수 없죠.</p>
         <div class="main-buttons">
             <a href="subscribe" class="action-button primary-button">뉴스레터 구독하기</a>
-            <a href="login" class="action-button secondary-button">뉴스레터 전송하기</a>
+            <a href="send" class="action-button secondary-button">뉴스레터 전송하기</a>
         </div>
+        <div class="unsubscribe-link-wrapper">
+        <a href="/unsubscribe" class="link-unsubscribe">뉴스레터 구독 취소</a>
+    </div>
     </div>
 </div>
 

@@ -2,11 +2,9 @@
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
-
-$page_title = '뉴스레터 구독';
 ?>
 <div class="form-wrapper">
-    <h2 class="section-title">뉴스레터 구독</h2>
+<h2 class="section-title">회원가입</h2>
     
     <?php
     // 성공 메시지가 있을 경우 표시
@@ -22,11 +20,13 @@ $page_title = '뉴스레터 구독';
     }
     ?>
 
-    <form action="/subscribe" method="POST" class="subscribe-form">
+    <form action="/register" method="POST" class="subscribe-form">
         <div class="form-group">
-            <input type="email" id="email" name="email" placeholder="이메일 주소" class="email-input" required>
-            <button type="submit" class="action-button primary-button">구독하기</button>
+            <input type="email" name="email" placeholder="이메일 주소" class="email-input" required>
         </div>
-        <p class="warning-text">해당 구독에 따라 발송되는 정보에 대해 본 사이트는 책임이 없습니다.</p>
+        <div class="form-group">
+            <input type="password" name="password" placeholder="비밀번호" class="email-input" required>
+        </div>
+        <button type="submit" class="action-button primary-button">가입하기</button>
     </form>
 </div>

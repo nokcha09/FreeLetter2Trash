@@ -1,65 +1,31 @@
 <?php
-session_start();
-require_once 'config.php';
-
-$message = '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'] ?? '';
-    $password = $_POST['password'] ?? '';
-
-    // 관리자 계정 확인
-    $is_admin = in_array($username, ADMIN_USERNAMES) && ($password === ADMIN_PASSWORD);
-
-    // 일반 사용자 (현재는 admin만)
-    $is_user = ($username === 'login' && $password === 'password') || $is_admin;
-
-    if ($is_user) {
-        // 로그인 성공 시 세션에 정보 저장
-        $_SESSION['authenticated'] = true;
-        $_SESSION['username'] = $username;
-        $_SESSION['is_admin'] = $is_admin;
-
-        if ($is_admin) {
-            header('Location: admin.php');
-        } else {
-            header('Location: index.php');
-        }
-        exit;
-    } else {
-        $message = "아이디 또는 비밀번호가 틀렸습니다.";
-    }
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
 }
-
-// 로그인 상태일 경우
-if (isset($_SESSION['authenticated']) && $_SESSION['authenticated'] === true) {
-    if ($_SESSION['is_admin']) {
-        header('Location: admin.php');
-    } else {
-        header('Location: index.php');
-    }
-    exit;
-}
-
 ?>
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <title>로그인</title>
-    <link rel="stylesheet" href="/public/style.css">
-</head>
-<body>
-    <div class="container login-box">
-        <h1>관리자 로그인</h1>
-        <?php if (!empty($message)): ?>
-            <p class="error"><?= htmlspecialchars($message) ?></p>
-        <?php endif; ?>
-        <form action="/actions/login.php" method="POST">
-            <input type="text" name="username" placeholder="사용자 이름" required>
-            <input type="password" name="password" placeholder="비밀번호" required>
-            <button type="submit" class="button-base action-button">로그인</button>
-        </form>
-    </div>
-</body>
-</html>
+<div class="form-wrapper">
+    <h2 class="section-title">로그인</h2>
+
+    <?php
+    // 성공 메시지가 있을 경우 표시
+    if (isset($_SESSION['success'])) {
+        echo '<div class="message-box success">' . htmlspecialchars($_SESSION['success']) . '</div>';
+        unset($_SESSION['success']);
+    }
+    // 에러 메시지가 있을 경우 표시
+    if (isset($_SESSION['error'])) {
+        echo '<div class="message-box error">' . htmlspecialchars($_SESSION['error']) . '</div>';
+        unset($_SESSION['error']);
+    }
+    ?>
+
+    <form action="/login" method="POST" class="subscribe-form">
+        <div class="form-group">
+            <input type="email" name="email" placeholder="이메일 주소" class="email-input" required>
+        </div>
+        <div class="form-group">
+            <input type="password" name="password" placeholder="비밀번호" class="email-input" required>
+        </div>
+        <button type="submit" class="action-button primary-button">로그인</button>
+    </form>
+</div>
