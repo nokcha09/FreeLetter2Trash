@@ -2,14 +2,12 @@
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
-
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../config/config.php';
 
-// 로그인 상태 확인 (폼이 직접 POST될 경우를 대비)
 if (!isset($_SESSION['user_id'])) {
     header('Location: /login.php');
     exit;
@@ -21,6 +19,7 @@ $isSuccess = false;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $subject = $_POST['subject'] ?? '새로운 뉴스레터';
     $raw_body = $_POST['body'] ?? '내용이 없습니다.';
+    $nickname = $_SESSION['nickname'] ?? '발신자'; // 세션에서 별명을 가져옵니다.
 
     $mail = new PHPMailer(true);
     try {
@@ -36,7 +35,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $mail->Subject = $subject;
         $mail->CharSet = 'UTF-8';
 
-        // 'verified' 상태인 구독자만 선택
         $stmt = $pdo->query("SELECT email FROM subscribers WHERE status = 'verified'");
         $subscribers = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
@@ -44,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message = "인증된 구독자가 없습니다. 메일을 보낼 수 없습니다.";
         } else {
             foreach ($subscribers as $email) {
-                $unsubscribeLink = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://{$_SERVER['HTTP_HOST']}/unsubscribe?email=" . urlencode($email);
+                $unsubscribeLink = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://{$_SERVER['HTTP_HOST']}/unsubscribe.php?email=" . urlencode($email);
 
                 $htmlBody = "
                 <div style='font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px;'>
@@ -57,6 +55,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <tr>
                             <td style='padding: 20px; color: #333333;'>
                                 <h2>{$subject}</h2>
+                                <p><strong>{$nickname}</strong>님으로부터 전해져오는 이야기입니다.</p>
+                                <hr style='border: 0; border-top: 1px solid #eee; margin: 20px 0;'>
                                 <p>{$raw_body}</p>
                             </td>
                         </tr>
@@ -83,6 +83,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $isSuccess = false;
     }
     
-    header('Location: /send?message=' . urlencode($message) . '&isSuccess=' . ($isSuccess ? 'true' : 'false'));
+    header('Location: /send.php?message=' . urlencode($message) . '&isSuccess=' . ($isSuccess ? 'true' : 'false'));
     exit;
 }

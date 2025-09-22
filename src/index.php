@@ -10,18 +10,24 @@ if (empty($page)) {
     $page = 'home';
 }
 
-// 1. GET 요청일 때: 화면 표시
+// 1. GET 요청일 때: 화면 표시 또는 예외 처리
 if ($method === 'GET') {
-    // verify 요청은 액션 파일로 바로 처리하고, 뷰를 로드하지 않습니다.
-    if ($page === 'verify') {
-        require_once 'actions/verify.php';
-        exit; // 리다이렉션이 발생하면 여기서 스크립트 실행을 종료합니다.
+    // 예외적으로 뷰를 로드하지 않는 GET 요청을 먼저 처리합니다.
+    switch ($page) {
+        case 'verify':
+            require_once 'actions/verify.php';
+            exit; // 리다이렉션이 발생하면 여기서 스크립트 실행을 종료합니다.
+        case 'logout':
+            require_once 'actions/logout.php';
+            exit;
+        case 'delete_account':
+            require_once 'actions/delete_account.php';
+            exit;
     }
     
     // 나머지 모든 GET 요청은 뷰 파일을 로드합니다.
-    $page_title = 'FreeLetter: 모두의 뉴스레터';
     require_once 'includes/header.php';
-
+    
     $view_path = 'views/' . $page . '.php';
     if (file_exists($view_path)) {
         require_once $view_path;

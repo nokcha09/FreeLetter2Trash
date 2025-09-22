@@ -4,19 +4,17 @@ if (session_status() == PHP_SESSION_NONE) {
 }
 ?>
 <div class="form-wrapper">
-<h2 class="section-title">회원가입</h2>
+    <h2 class="section-title">회원가입</h2>
     
     <?php
-    // 성공 메시지가 있을 경우 표시
     if (isset($_SESSION['success'])) {
         echo '<div class="message-box success">' . htmlspecialchars($_SESSION['success']) . '</div>';
-        unset($_SESSION['success']); // 메시지를 한 번 표시한 후 세션에서 제거합니다.
+        unset($_SESSION['success']);
     }
 
-    // 에러 메시지가 있을 경우 표시
     if (isset($_SESSION['error'])) {
         echo '<div class="message-box error">' . htmlspecialchars($_SESSION['error']) . '</div>';
-        unset($_SESSION['error']); // 메시지를 한 번 표시한 후 세션에서 제거합니다.
+        unset($_SESSION['error']);
     }
     ?>
 
@@ -26,6 +24,9 @@ if (session_status() == PHP_SESSION_NONE) {
         </div>
         <div class="form-group">
             <input type="password" name="password" placeholder="비밀번호" class="email-input" required>
+        </div>
+        <div class="form-group">
+            <input type="text" name="nickname" placeholder="별명" class="email-input" required>
         </div>
         <button type="submit" class="action-button primary-button">가입하기</button>
     </form>

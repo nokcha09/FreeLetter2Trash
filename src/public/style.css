@@ -589,3 +589,43 @@ input[type="text"]:focus {
     justify-content: center;
     padding-top: 10px;
 }
+
+/* =======================================
+   10. 마이 페이지 - 계정 삭제 스타일
+   ======================================= */
+   .delete-account-section {
+    margin-top: 40px;
+    padding: 20px;
+    background-color: #fcebeb;
+    border: 1px solid #f5c6cb;
+    border-radius: 8px;
+    color: #721c24;
+    text-align: center;
+}
+
+.delete-account-section h3 {
+    margin-top: 0;
+    font-size: 1.2em;
+    color: #721c24;
+}
+
+.delete-account-section p {
+    margin-bottom: 20px;
+}
+
+.delete-button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+}
+
+.delete-button:hover {
+    background-color: #c82333;
+}
+
+.divider {
+    border: 0;
+    height: 1px;
+    background: #ccc;
+    margin: 30px 0;
+}

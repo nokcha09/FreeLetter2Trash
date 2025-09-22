@@ -12,6 +12,7 @@ require_once __DIR__ . '/../vendor/autoload.php';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
     $password = $_POST['password'];
+    $nickname = $_POST['nickname'] ?? null;
 
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $_SESSION['error'] = '유효한 이메일 주소를 입력해주세요.';
@@ -40,13 +41,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $verificationToken = bin2hex(random_bytes(32));
 
         if ($user) {
-            $stmt = $pdo->prepare("UPDATE users SET password = ?, token = ?, created_at = NOW() WHERE email = ?");
-            $stmt->execute([$hashedPassword, $verificationToken, $email]);
+            $stmt = $pdo->prepare("UPDATE users SET password = ?, nickname = ?, token = ?, created_at = NOW() WHERE email = ?");
+            $stmt->execute([$hashedPassword, $nickname, $verificationToken, $email]);
         } else {
-            $stmt = $pdo->prepare("INSERT INTO users (email, password, token) VALUES (?, ?, ?)");
-            $stmt->execute([$email, $hashedPassword, $verificationToken]);
+            $stmt = $pdo->prepare("INSERT INTO users (email, password, nickname, token) VALUES (?, ?, ?, ?)");
+            $stmt->execute([$email, $hashedPassword, $nickname, $verificationToken]);
         }
         
+        // ... (메일 발송 로직은 이전과 동일)
         $mail = new PHPMailer(true);
         $mail->isSMTP();
         $mail->Host       = getenv('SMTP_HOST') ?: 'mailhog';
@@ -85,9 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $mail->send();
 
         $_SESSION['success'] = '회원가입을 위한 인증 메일이 발송되었습니다. 메일함을 확인해주세요.';
-        
-        // 리다이렉션 주소를 /register로 변경
-        header('Location: /register'); 
+        header('Location: /register');
         exit;
 
     } catch (Exception $e) {

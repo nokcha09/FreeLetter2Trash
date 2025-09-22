@@ -28,4 +28,7 @@ if (session_status() == PHP_SESSION_NONE) {
         </div>
         <button type="submit" class="action-button primary-button">로그인</button>
     </form>
+    <div class="link-group" style="margin-top: 15px;">
+        <a href="/repassword" class="secondary-link">비밀번호 찾기</a>
+    </div>
 </div>

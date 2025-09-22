@@ -20,7 +20,9 @@ $page_title = isset($page_title) ? $page_title : 'FreeLetter: 모두의 뉴스�
         <a href="/" class="logo">FreeLetter</a>
         <nav class="nav">
             <?php if (isset($_SESSION['user_id'])): ?>
-                <a href="/actions/logout.php" class="nav-link">로그아웃</a>
+                <a href="/send" class="nav-link">뉴스레터 전송</a>
+                <a href="/mypage" class="nav-link">마이 페이지</a>
+                <a href="/logout" class="nav-link">로그아웃</a>
             <?php else: ?>
                 <a href="/register" class="nav-link">회원가입</a>
                 <a href="/login" class="nav-link">로그인</a>
