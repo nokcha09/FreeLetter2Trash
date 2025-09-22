@@ -2,15 +2,14 @@
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require 'vendor/autoload.php';
-require_once 'config.php';
+// vendor와 config 파일을 올바르게 불러옵니다.
+require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../config/config.php';
 
 $message = '';
 $isSuccess = false;
 
-// 웹사이트 기본 URL 설정
-$baseUrl = 'http://localhost:8080';
-
+// POST 요청일 때만 메일 전송 로직을 실행합니다.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $subject = $_POST['subject'] ?? '새로운 뉴스레터';
     $raw_body = $_POST['body'] ?? '내용이 없습니다.';
@@ -36,8 +35,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message = "구독자가 없습니다. 메일을 보낼 수 없습니다.";
         } else {
             foreach ($subscribers as $email) {
-                // 구독 해제 링크를 동적으로 생성 (포트 8080 포함)
-                $unsubscribeLink = "{$baseUrl}/unsubscribe.php?email=" . urlencode($email);
+                // 구독 해제 링크를 동적으로 생성 (도메인과 포트 자동 포함)
+                $unsubscribeLink = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://{$_SERVER['HTTP_HOST']}/unsubscribe.php?email=" . urlencode($email);
 
                 // HTML 메일 템플릿
                 $htmlBody = "
@@ -75,29 +74,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } catch (Exception $e) {
         $message = "메일 전송 실패: {$mail->ErrorInfo}";
     }
+    
+    // 메일 전송 후 admin 페이지로 리디렉션
+    header('Location: /admin?message=' . urlencode($message) . '&isSuccess=' . ($isSuccess ? 'true' : 'false'));
+    exit;
 }
 ?>
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <title>뉴스레터 보내기</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div class="container">
-        <h1>뉴스레터 보내기</h1>
-        <?php if (!empty($message)): ?>
-            <div class="message-box <?= $isSuccess ? 'success' : 'error' ?>">
-                <?= htmlspecialchars($message) ?>
-            </div>
-        <?php endif; ?>
-        <form action="send.php" method="POST">
-            <input type="text" name="subject" placeholder="제목" required>
-            <textarea name="body" placeholder="본문" required></textarea>
-            <button type="submit">보내기</button>
-        </form>
-        <a href="index.php" class="home-link">홈으로 돌아가기</a>
-    </div>
-</body>
-</html>
+
+<div class="container">
+    <h1 class="main-title">뉴스레터 보내기</h1>
+    <form action="/send" method="POST">
+        <input type="text" name="subject" placeholder="제목" required>
+        <textarea name="body" placeholder="본문" required></textarea>
+        <div class="main-buttons">
+            <button type="submit" class="action-button">전송</button>
+        </div>
+    </form>
+    <a href="/admin" class="unsubscribe-link">관리자 페이지로 돌아가기</a>
+</div>

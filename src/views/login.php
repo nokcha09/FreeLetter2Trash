@@ -47,18 +47,18 @@ if (isset($_SESSION['authenticated']) && $_SESSION['authenticated'] === true) {
 <head>
     <meta charset="UTF-8">
     <title>로그인</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/public/style.css">
 </head>
 <body>
-    <div class="login-box">
-        <h1>로그인</h1>
+    <div class="container login-box">
+        <h1>관리자 로그인</h1>
         <?php if (!empty($message)): ?>
-            <p class="message"><?= htmlspecialchars($message) ?></p>
+            <p class="error"><?= htmlspecialchars($message) ?></p>
         <?php endif; ?>
-        <form action="login.php" method="POST">
-            <input type="text" name="username" placeholder="아이디" required><br>
-            <input type="password" name="password" placeholder="비밀번호" required><br>
-            <button type="submit">로그인</button>
+        <form action="/actions/login.php" method="POST">
+            <input type="text" name="username" placeholder="사용자 이름" required>
+            <input type="password" name="password" placeholder="비밀번호" required>
+            <button type="submit" class="button-base action-button">로그인</button>
         </form>
     </div>
 </body>
